@@ -1,0 +1,87 @@
+{% extends "base_main.html" %}
+
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Welcome, {{ current_user.username }}!</h2>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Find Doctors
+                </a>
+                <a href="{{ url_for('patient.appointments') }}" class="btn btn-info">
+                    <i class="fas fa-calendar-check"></i> My Appointments
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Appointments -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Upcoming Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="list-group">
+                            {% for appointment in appointments %}
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">Dr. {{ appointment.doctor.username }}</h6>
+                                    <p class="mb-1">
+                                        <i class="fas fa-calendar"></i> 
+                                        {{ appointment.date.strftime('%B %d, %Y') }}
+                                    </p>
+                                    <small class="text-muted">
+                                        Status: 
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming appointments</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Referrals -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Pending Referrals</h5>
+                </div>
+                <div class="card-body">
+                    {% if referrals %}
+                        <div class="list-group">
+                            {% for referral in referrals %}
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">From: Dr. {{ referral.referring_doctor.username }}</h6>
+                                    <p class="mb-1">To: Dr. {{ referral.referred_doctor.username }}</p>
+                                    <p class="mb-1">
+                                        <small class="text-muted">
+                                            {{ referral.created_at.strftime('%B %d, %Y') }}
+                                        </small>
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No pending referrals</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

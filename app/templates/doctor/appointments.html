@@ -1,0 +1,235 @@
+{% extends "base_main.html" %}
+
+{% block title %}Manage Appointments{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Appointments</h2>
+                <div>
+                    <a href="{{ url_for('doctor.manage_schedule') }}" class="btn btn-primary">
+                        <i class="fas fa-calendar-alt"></i> Manage Schedule
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Filters -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <select class="form-select" id="statusFilter">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="date" class="form-control" id="dateFilter">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-secondary" onclick="resetFilters()">
+                                Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Patient</th>
+                                        <th>Symptoms</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                        <tr class="appointment-row" 
+                                            data-status="{{ appointment.status }}"
+                                            data-date="{{ appointment.date.strftime('%Y-%m-%d') }}">
+                                            <td>{{ appointment.date.strftime('%B %d, %Y %I:%M %p') }}</td>
+                                            <td>{{ appointment.patient.username }}</td>
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 200px;">
+                                                    {{ appointment.symptoms }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 
+                                                    'success' if appointment.status == 'confirmed' 
+                                                    else 'warning' if appointment.status == 'pending'
+                                                    else 'info' if appointment.status == 'completed'
+                                                    else 'danger' }}">
+                                                    {{ appointment.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-info"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                    <i class="fas fa-eye"></i> View
+                                                </button>
+                                                {% if appointment.status == 'pending' %}
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-success"
+                                                            onclick="updateAppointmentStatus('{{ appointment.id }}', 'confirmed')">
+                                                        <i class="fas fa-check"></i> Confirm
+                                                    </button>
+                                                {% endif %}
+                                                {% if appointment.status == 'confirmed' %}
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-info"
+                                                            onclick="updateAppointmentStatus('{{ appointment.id }}', 'completed')">
+                                                        <i class="fas fa-check-double"></i> Complete
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                        <!-- Appointment Details Modal -->
+                                        <div class="modal fade" id="appointmentModal{{ appointment.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Appointment Details</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <h6>Patient Information</h6>
+                                                            <p>
+                                                                <strong>Name:</strong> {{ appointment.patient.username }}<br>
+                                                                <strong>Email:</strong> {{ appointment.patient.email }}
+                                                            </p>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <h6>Symptoms</h6>
+                                                            <p>{{ appointment.symptoms }}</p>
+                                                        </div>
+                                                        {% if appointment.notes %}
+                                                            <div class="mb-3">
+                                                                <h6>Additional Notes</h6>
+                                                                <p>{{ appointment.notes }}</p>
+                                                            </div>
+                                                        {% endif %}
+                                                        <div class="mb-3">
+                                                            <h6>Appointment Status</h6>
+                                                            <div class="d-flex gap-2">
+                                                                {% if appointment.status == 'pending' %}
+                                                                    <button class="btn btn-success btn-sm"
+                                                                            onclick="updateAppointmentStatus('{{ appointment.id }}', 'confirmed')">
+                                                                        Confirm Appointment
+                                                                    </button>
+                                                                {% endif %}
+                                                                {% if appointment.status == 'confirmed' %}
+                                                                    <button class="btn btn-info btn-sm"
+                                                                            onclick="updateAppointmentStatus('{{ appointment.id }}', 'completed')">
+                                                                        Mark as Completed
+                                                                    </button>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No appointments found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateAppointmentStatus(appointmentId, status) {
+    if (confirm('Are you sure you want to update this appointment?')) {
+        fetch(`/doctor/appointments/${appointmentId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: status })
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                response.json().then(data => {
+                    alert(data.error || 'An error occurred while updating the appointment.');
+                });
+            }
+        }).catch(error => {
+            alert('An error occurred while updating the appointment.');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function filterAppointments() {
+    try {
+        const status = document.getElementById('statusFilter').value;
+        const date = document.getElementById('dateFilter').value;
+        
+        document.querySelectorAll('.appointment-row').forEach(row => {
+            let show = true;
+            
+            if (status !== 'all' && row.dataset.status !== status) {
+                show = false;
+            }
+            
+            if (date && row.dataset.date !== date) {
+                show = false;
+            }
+            
+            row.style.display = show ? '' : 'none';
+        });
+    } catch (error) {
+        console.error('Error filtering appointments:', error);
+    }
+}
+
+function resetFilters() {
+    document.getElementById('statusFilter').value = 'all';
+    document.getElementById('dateFilter').value = '';
+    document.querySelectorAll('.appointment-row').forEach(row => {
+        row.style.display = '';
+    });
+}
+
+document.getElementById('statusFilter').addEventListener('change', filterAppointments);
+document.getElementById('dateFilter').addEventListener('change', filterAppointments);
+</script>
+{% endblock %} 

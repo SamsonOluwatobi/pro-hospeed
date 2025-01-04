@@ -1,0 +1,91 @@
+{% extends "base_main.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Welcome, Dr. {{ current_user.username }}</h2>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('doctor.manage_schedule') }}" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt"></i> Manage Schedule
+                </a>
+                <a href="{{ url_for('doctor.appointments') }}" class="btn btn-info">
+                    <i class="fas fa-calendar-check"></i> View Appointments
+                </a>
+                <a href="{{ url_for('doctor.create_referral') }}" class="btn btn-success">
+                    <i class="fas fa-file-medical"></i> Create Referral
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Appointments -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Today's Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="list-group">
+                            {% for appointment in appointments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ appointment.user.username }}</h6>
+                                        <small>
+                                            {{ appointment.date.strftime('%I:%M %p') }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1">
+                                        <strong>Symptoms:</strong> {{ appointment.symptoms }}
+                                    </p>
+                                    {% if appointment.notes %}
+                                        <small class="text-muted">
+                                            <strong>Notes:</strong> {{ appointment.notes }}
+                                        </small>
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' }}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No appointments scheduled for today</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <h6 class="mb-1">Today's Appointments</h6>
+                            <h4 class="mb-0">{{ appointments|length }}</h4>
+                        </div>
+                        <div class="list-group-item">
+                            <h6 class="mb-1">Pending Referrals</h6>
+                            <h4 class="mb-0">{{ pending_referrals|default(0) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

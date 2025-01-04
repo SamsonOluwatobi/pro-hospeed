@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block styles %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+        color: white;
+        padding: 120px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80') center/cover;
+        opacity: 0.1;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Features Section */
+    .features-section {
+        padding: 80px 0;
+        background: #f8f9fa;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        border: none;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* How It Works Section */
+    .how-it-works {
+        padding: 80px 0;
+    }
+    
+    .step-card {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-weight: bold;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+        color: white;
+        padding: 60px 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        padding: 100px 0;
+        background: #f8f9fa;
+        text-align: center;
+    }
+    
+    .btn-gradient {
+        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-gradient:hover {
+        transform: translateY(-3px);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center hero-content">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Healthcare at the Speed of Life</h1>
+                <p class="lead mb-5">Connect with trusted healthcare professionals instantly. Book appointments, manage referrals, and take control of your health journey with HoSpeed.</p>
+                {% if not current_user.is_authenticated %}
+                    <div class="d-grid gap-3 d-sm-flex">
+                        <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-5">Get Started</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-5">Sign In</a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80" 
+                     class="img-fluid rounded-3 shadow" alt="Healthcare professionals">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose HoSpeed?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-search feature-icon"></i>
+                    <h4>Smart Doctor Search</h4>
+                    <p>Find the right healthcare professional based on specialization, location, and availability. View detailed profiles and make informed decisions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-calendar-check feature-icon"></i>
+                    <h4>Easy Scheduling</h4>
+                    <p>Book appointments instantly with real-time availability. Manage your medical schedule effortlessly with automated reminders.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="fas fa-file-medical feature-icon"></i>
+                    <h4>Seamless Referrals</h4>
+                    <p>Experience smooth transitions between healthcare providers with our integrated referral system. Track referral status in real-time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5>Sign Up</h5>
+                    <p>Create your account as a patient or healthcare provider</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5>Find Doctors</h5>
+                    <p>Search for specialists near you using our smart filters</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5>Book Appointment</h5>
+                    <p>Select a convenient time slot and book instantly</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h5>Get Care</h5>
+                    <p>Visit your doctor and receive quality healthcare</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div>Healthcare Providers</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number">50,000+</div>
+                    <div>Appointments Booked</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div>Patient Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="mb-4">Ready to Transform Your Healthcare Experience?</h2>
+        <p class="lead mb-5">Join thousands of satisfied users who have chosen HoSpeed for their healthcare needs.</p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-gradient btn-lg">Get Started Now</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}

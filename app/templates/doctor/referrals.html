@@ -1,0 +1,264 @@
+{% extends "base_main.html" %}
+
+{% block title %}Manage Referrals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Referrals Management</h2>
+                <a href="{{ url_for('doctor.create_referral') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Create New Referral
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referrals Tabs -->
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="referralTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sent-tab" data-bs-toggle="tab" 
+                            data-bs-target="#sent" type="button" role="tab">
+                        Sent Referrals
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="received-tab" data-bs-toggle="tab" 
+                            data-bs-target="#received" type="button" role="tab">
+                        Received Referrals
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="referralTabsContent">
+                <!-- Sent Referrals -->
+                <div class="tab-pane fade show active" id="sent" role="tabpanel">
+                    <div class="card border-top-0">
+                        <div class="card-body">
+                            {% if sent_referrals %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Patient</th>
+                                                <th>Referred To</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for referral in sent_referrals %}
+                                                <tr>
+                                                    <td>{{ referral.created_at.strftime('%B %d, %Y') }}</td>
+                                                    <td>{{ referral.patient.username }}</td>
+                                                    <td>Dr. {{ referral.referred_doctor.username }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ 
+                                                            'success' if referral.status == 'completed'
+                                                            else 'info' if referral.status == 'accepted'
+                                                            else 'warning' }}">
+                                                            {{ referral.status }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-info"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#referralModal{{ referral.id }}">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Referral Details Modal -->
+                                                <div class="modal fade" id="referralModal{{ referral.id }}">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Referral Details</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    <h6>Patient Information</h6>
+                                                                    <p>
+                                                                        <strong>Name:</strong> {{ referral.patient.username }}<br>
+                                                                        <strong>Email:</strong> {{ referral.patient.email }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <h6>Referred To</h6>
+                                                                    <p>
+                                                                        <strong>Doctor:</strong> Dr. {{ referral.referred_doctor.username }}<br>
+                                                                        <strong>Specialization:</strong> {{ referral.referred_doctor.specialization }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <h6>Reason for Referral</h6>
+                                                                    <p>{{ referral.reason }}</p>
+                                                                </div>
+                                                                {% if referral.notes %}
+                                                                    <div class="mb-3">
+                                                                        <h6>Additional Notes</h6>
+                                                                        <p>{{ referral.notes }}</p>
+                                                                    </div>
+                                                                {% endif %}
+                                                                <p class="text-muted">
+                                                                    <small>Created on {{ referral.created_at.strftime('%B %d, %Y') }}</small>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center">No sent referrals found</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Received Referrals -->
+                <div class="tab-pane fade" id="received" role="tabpanel">
+                    <div class="card border-top-0">
+                        <div class="card-body">
+                            {% if received_referrals %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Patient</th>
+                                                <th>Referred By</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for referral in received_referrals %}
+                                                <tr>
+                                                    <td>{{ referral.created_at.strftime('%B %d, %Y') }}</td>
+                                                    <td>{{ referral.patient.username }}</td>
+                                                    <td>Dr. {{ referral.referring_doctor.username }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{{ 
+                                                            'success' if referral.status == 'completed'
+                                                            else 'info' if referral.status == 'accepted'
+                                                            else 'warning' }}">
+                                                            {{ referral.status }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-info"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#receivedModal{{ referral.id }}">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                        {% if referral.status == 'pending' %}
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-success"
+                                                                    onclick="updateReferralStatus('{{ referral.id }}', 'accepted')">
+                                                                <i class="fas fa-check"></i> Accept
+                                                            </button>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-danger"
+                                                                    onclick="updateReferralStatus('{{ referral.id }}', 'rejected')">
+                                                                <i class="fas fa-times"></i> Reject
+                                                            </button>
+                                                        {% elif referral.status == 'accepted' %}
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-success"
+                                                                    onclick="updateReferralStatus('{{ referral.id }}', 'completed')">
+                                                                <i class="fas fa-check-double"></i> Complete
+                                                            </button>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Received Referral Modal -->
+                                                <div class="modal fade" id="receivedModal{{ referral.id }}">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Referral Details</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    <h6>Patient Information</h6>
+                                                                    <p>
+                                                                        <strong>Name:</strong> {{ referral.patient.username }}<br>
+                                                                        <strong>Email:</strong> {{ referral.patient.email }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <h6>Referring Doctor</h6>
+                                                                    <p>
+                                                                        <strong>Name:</strong> Dr. {{ referral.referring_doctor.username }}<br>
+                                                                        <strong>Specialization:</strong> {{ referral.referring_doctor.specialization }}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <h6>Reason for Referral</h6>
+                                                                    <p>{{ referral.reason }}</p>
+                                                                </div>
+                                                                {% if referral.notes %}
+                                                                    <div class="mb-3">
+                                                                        <h6>Additional Notes</h6>
+                                                                        <p>{{ referral.notes }}</p>
+                                                                    </div>
+                                                                {% endif %}
+                                                                <p class="text-muted">
+                                                                    <small>Created on {{ referral.created_at.strftime('%B %d, %Y') }}</small>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted text-center">No received referrals found</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateReferralStatus(referralId, status) {
+    if (confirm('Are you sure you want to update this referral?')) {
+        fetch(`/doctor/referrals/${referralId}/status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: status })
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 
