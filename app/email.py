@@ -15,10 +15,19 @@ def send_async_email(app, msg):
 def send_email(subject, recipients, html_body):
     msg = Message(
         subject=subject,
-        sender=('HoSpeed', current_app.config['MAIL_USERNAME']),
+        sender=('HoSpeed Healthcare', current_app.config['MAIL_USERNAME']),
         recipients=recipients,
         html=html_body
     )
+    
+    # Add headers to improve deliverability
+    msg.extra_headers = {
+        'List-Unsubscribe': '<mailto:' + current_app.config['MAIL_USERNAME'] + '?subject=unsubscribe>',
+        'Precedence': 'bulk',
+        'Auto-Submitted': 'auto-generated',
+        'X-Mailer': 'HoSpeed Healthcare Platform'
+    }
+    
     Thread(target=send_async_email,
            args=(current_app._get_current_object(), msg)).start()
 

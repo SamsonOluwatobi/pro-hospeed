@@ -50,7 +50,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
-                        {% if current_user.user_type == 'doctor' %}
+                        {% if current_user.user_type == 'admin' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                                    <i class="fas fa-chart-line me-1"></i> Admin Dashboard
+                                </a>
+                            </li>
+                        {% elif current_user.user_type == 'doctor' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('doctor.dashboard') }}">
                                     <i class="fas fa-clinic-medical me-1"></i> Dashboard
@@ -66,8 +72,8 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.profile') }}">
                                 <i class="fas fa-user-circle me-1"></i> Profile
-                            </a>
-                        </li>
+                                    </a>
+                                </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">
                                 <i class="fas fa-sign-out-alt me-1"></i> Logout
@@ -87,8 +93,8 @@
     </nav>
 
     <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
             <div class="flash-messages container mt-3">
                 {% for category, message in messages %}
                     <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
@@ -98,8 +104,8 @@
                     </div>
                 {% endfor %}
             </div>
-        {% endif %}
-    {% endwith %}
+            {% endif %}
+        {% endwith %}
 
     <!-- Main Content -->
     <main class="flex-shrink-0">
@@ -110,7 +116,7 @@
     <footer class="footer mt-auto py-4 bg-light">
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-{% if request.endpoint == 'main.index' %}4{% else %}6{% endif %}">
                     <div class="d-flex align-items-center mb-3">
                         <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0z" fill="url(#paint0_linear)"/>
@@ -126,6 +132,7 @@
                     </div>
                     <p class="text-muted">Healthcare at the Speed of Life</p>
                 </div>
+                {% if request.endpoint == 'main.index' and not current_user.is_authenticated %}
                 <div class="col-md-4">
                     <h5 class="mb-3 text-primary">Contributors</h5>
                     <div class="contributors-grid">
@@ -150,11 +157,14 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end">
+                {% else %}
+                <div class="col-md-6 text-md-end">
+                {% endif %}
                     <p class="mb-2 text-muted">&copy; {{ now.year }} HoSpeed. All rights reserved.</p>
                     <div class="social-links">
                         <a href="https://github.com/SamsonOluwatobi/pro-hospeed" class="text-muted me-2"><i class="fab fa-github"></i></a>
                         <a href="https://www.linkedin.com/in/lana-samson" class="text-muted me-2"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" class="text-muted"><i class="fab fa-twitter"></i></a>
+                        <a href="https://x.com/kyamatta?t=3JS7j8Upymi8eAN-NPIXbw&s=08" class="text-muted"><i class="fab fa-x"></i></a>
                     </div>
                 </div>
             </div>

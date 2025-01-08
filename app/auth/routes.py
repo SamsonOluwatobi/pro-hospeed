@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.models import User
-from app.auth.forms import LoginForm, SignupForm, ChangePasswordForm
-from app.email import send_verification_email
+from app.auth.forms import LoginForm, SignupForm, ChangePasswordForm, ForgotPasswordForm, ResetPasswordForm
+from app.email import send_verification_email, send_password_reset_email
 from urllib.parse import urlparse
 import traceback
 
@@ -13,7 +13,9 @@ auth = Blueprint('auth', __name__)
 def login():
     """Handle user login."""
     if current_user.is_authenticated:
-        if current_user.user_type == 'doctor':
+        if current_user.user_type == 'admin':
+            return redirect(url_for('admin.dashboard'))
+        elif current_user.user_type == 'doctor':
             return redirect(url_for('doctor.dashboard'))
         else:
             return redirect(url_for('patient.dashboard'))
@@ -28,7 +30,9 @@ def login():
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
-            if user.user_type == 'doctor':
+            if user.user_type == 'admin':
+                next_page = url_for('admin.dashboard')
+            elif user.user_type == 'doctor':
                 next_page = url_for('doctor.dashboard')
             else:
                 next_page = url_for('patient.dashboard')
@@ -137,4 +141,36 @@ def change_password():
             return redirect(url_for('main.profile'))
         else:
             flash('Current password is incorrect.', 'danger')
-    return render_template('auth/change_password.html', form=form) 
+    return render_template('auth/change_password.html', form=form)
+
+@auth.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.lower()).first()
+        if user:
+            send_password_reset_email(user)
+        flash('If an account exists with that email, we have sent a password reset link.', 'info')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/forgot_password.html', title='Reset Password', form=form)
+
+@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    user = User.verify_reset_password_token(token)
+    if not user:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('auth/reset_password.html', form=form) 

@@ -80,8 +80,8 @@
                             <h2 class="mb-0">{{ current_user.appointments_as_patient|selectattr('status', 'equalto', 'pending')|list|length }}</h2>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                    </div>
+                {% endif %}
         </div>
     {% else %}
         <!-- Hero Carousel Section -->
@@ -135,8 +135,8 @@
                                     <h1 class="display-3 text-white fw-bold mb-4">Smart Healthcare</h1>
                                     <p class="lead text-white mb-4">Experience modern healthcare with automated reminders, digital prescriptions, and seamless communication.</p>
                                     <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-4">Join Now</a>
-                                </div>
-                                <div class="col-lg-6">
+            </div>
+            <div class="col-lg-6">
                                     <img src="{{ url_for('static', filename='images/hero-3.svg') }}" alt="Smart Healthcare" class="img-fluid floating-animation">
                                 </div>
                             </div>
@@ -146,18 +146,18 @@
             </div>
         </div>
 
-        <!-- Features Section -->
+<!-- Features Section -->
         <section id="features" class="py-5">
-            <div class="container">
+    <div class="container">
                 <div class="row text-center mb-5">
                     <div class="col-lg-6 mx-auto">
                         <h2 class="display-5 fw-bold mb-3">Why Choose HoSpeed?</h2>
                         <p class="lead text-muted">Experience healthcare reimagined with our innovative platform</p>
                     </div>
                 </div>
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="feature-card">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
                             <div class="feature-icon bg-primary-soft">
                                 <i class="fas fa-calendar-check"></i>
                             </div>
@@ -166,10 +166,10 @@
                             <div class="feature-hover">
                                 <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Try Now</a>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
                             <div class="feature-icon bg-success-soft">
                                 <i class="fas fa-user-md"></i>
                             </div>
@@ -178,10 +178,10 @@
                             <div class="feature-hover">
                                 <a href="{{ url_for('auth.signup') }}" class="btn btn-success">Find Doctors</a>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
                             <div class="feature-icon bg-info-soft">
                                 <i class="fas fa-bell"></i>
                             </div>
@@ -222,15 +222,15 @@
                         <div class="stat-card text-center">
                             <div class="stat-number" data-count="10">0</div>
                             <p class="text-muted mb-0">Specialties</p>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
+</section>
 
-        <!-- How It Works Section -->
+<!-- How It Works Section -->
         <section class="py-5">
-            <div class="container">
+    <div class="container">
                 <div class="row text-center mb-5">
                     <div class="col-lg-6 mx-auto">
                         <h2 class="display-5 fw-bold mb-3">How It Works</h2>
@@ -238,39 +238,39 @@
                     </div>
                 </div>
                 <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="step-card">
-                            <div class="step-number">1</div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">1</div>
                             <h5 class="mt-4">Sign Up</h5>
                             <p class="text-muted">Create your account in minutes</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="step-card">
-                            <div class="step-number">2</div>
-                            <h5 class="mt-4">Find Doctor</h5>
-                            <p class="text-muted">Browse through our network</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="step-card">
-                            <div class="step-number">3</div>
-                            <h5 class="mt-4">Book Appointment</h5>
-                            <p class="text-muted">Select your preferred time</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="step-card">
-                            <div class="step-number">4</div>
-                            <h5 class="mt-4">Get Care</h5>
-                            <p class="text-muted">Meet your doctor and get care</p>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </section>
-    {% endif %}
-</div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                            <h5 class="mt-4">Find Doctor</h5>
+                            <p class="text-muted">Browse through our network</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                            <h5 class="mt-4">Book Appointment</h5>
+                            <p class="text-muted">Select your preferred time</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                            <h5 class="mt-4">Get Care</h5>
+                            <p class="text-muted">Meet your doctor and get care</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+        {% endif %}
+    </div>
 
 <style>
 /* Carousel Styles */
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { threshold: 0.5 });
 
     stats.forEach(stat => observer.observe(stat));
-});
+    });
 </script>
 {% endblock %}
 {% endblock %}

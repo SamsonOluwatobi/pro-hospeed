@@ -28,11 +28,17 @@ def create_app(config_class=Config):
         from app.auth.routes import auth
         from app.doctor.routes import doctor
         from app.patient.routes import patient
+        from app.admin.routes import admin
+        from app.cli import create_admin
         
         app.register_blueprint(main)
         app.register_blueprint(auth, url_prefix='/auth')
         app.register_blueprint(doctor, url_prefix='/doctor')
         app.register_blueprint(patient, url_prefix='/patient')
+        app.register_blueprint(admin, url_prefix='/admin')
+        
+        # Register CLI commands
+        app.cli.add_command(create_admin)
 
         # Error handlers
         @app.errorhandler(404)

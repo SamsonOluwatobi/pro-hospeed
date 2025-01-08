@@ -3,31 +3,39 @@
 {% block title %}Appointment Confirmation{% endblock %}
 
 {% block content %}
-<p>Dear {{ appointment.patient.username }},</p>
-
-<p>Your appointment has been confirmed with the following details:</p>
-
-<div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
-    <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.username }}</p>
-    <p><strong>Specialization:</strong> {{ appointment.doctor.specialization }}</p>
-    <p><strong>Date:</strong> {{ appointment.date.strftime('%B %d, %Y') }}</p>
-    <p><strong>Time:</strong> {{ appointment.date.strftime('%I:%M %p') }}</p>
-    <p><strong>Location:</strong> {{ appointment.doctor.clinic_address }}</p>
+<div class="info-card">
+    <h2 style="color: #2d3748; margin-top: 0;">Hello {{ appointment.patient.username }},</h2>
+    
+    <p>Your appointment has been successfully scheduled with Dr. {{ appointment.doctor.username }}.</p>
 </div>
 
-<p><strong>Important Notes:</strong></p>
-<ul>
-    <li>Please arrive 15 minutes before your appointment time</li>
-    <li>Bring any relevant medical records or test results</li>
-    <li>If you need to cancel or reschedule, please do so at least 24 hours in advance</li>
-</ul>
+<div class="info-card" style="border-left-color: #48bb78;">
+    <h3 style="color: #2d3748; margin-top: 0;">Appointment Details</h3>
+    <p><strong>Date & Time:</strong> {{ appointment.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+    <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.username }}</p>
+    <p><strong>Location:</strong> {{ appointment.doctor.clinic_address }}</p>
+    {% if appointment.notes %}
+    <p><strong>Notes:</strong> {{ appointment.notes }}</p>
+    {% endif %}
+</div>
 
-<p style="text-align: center;">
+<div class="info-card" style="border-left-color: #ed8936;">
+    <h3 style="color: #2d3748; margin-top: 0;">Important Information</h3>
+    <ul style="padding-left: 20px; margin: 10px 0;">
+        <li>Please arrive 15 minutes before your appointment time</li>
+        <li>Bring any relevant medical records or test results</li>
+        <li>Wear a face mask during your visit</li>
+        <li>Follow all safety protocols</li>
+    </ul>
+</div>
+
+<p style="text-align: center; margin-top: 30px;">
     <a href="{{ url_for('patient.view_appointment', appointment_id=appointment.id, _external=True) }}" class="button">
         View Appointment Details
     </a>
 </p>
 
-<p>Best regards,<br>
-The HoSpeed Team</p>
+<p style="text-align: center; color: #718096; margin-top: 30px;">
+    Need to reschedule? Please contact us at least 24 hours before your appointment.
+</p>
 {% endblock %} 

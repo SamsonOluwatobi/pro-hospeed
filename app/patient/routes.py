@@ -39,6 +39,7 @@ def dashboard():
 
 @patient.route('/find-doctors', methods=['GET', 'POST'])
 @login_required
+@patient_required
 def find_doctors():
     form = SearchDoctorForm()
     doctors = []
@@ -46,23 +47,16 @@ def find_doctors():
     if form.validate_on_submit() or request.args.get('specialization'):
         specialization = form.specialization.data or request.args.get('specialization')
         if specialization:
-            doctor_query = User.query.filter_by(
+            doctors = User.query.filter_by(
                 user_type='doctor',
                 specialization=specialization
-            )
+            ).all()
         else:
             # If no specialization selected, show all doctors
-            doctor_query = User.query.filter_by(user_type='doctor')
-        
-        # Convert User objects to dictionaries for JSON serialization
-        doctors = [{
-            'id': doctor.id,
-            'username': doctor.username,
-            'specialization': doctor.specialization,
-            'clinic_address': doctor.clinic_address,
-            'latitude': doctor.latitude,
-            'longitude': doctor.longitude
-        } for doctor in doctor_query.all()]
+            doctors = User.query.filter_by(user_type='doctor').all()
+    else:
+        # By default, show all doctors
+        doctors = User.query.filter_by(user_type='doctor').all()
     
     return render_template('patient/find_doctors.html', 
                          form=form, 
@@ -70,11 +64,8 @@ def find_doctors():
 
 @patient.route('/book-appointment/<int:doctor_id>', methods=['GET', 'POST'])
 @login_required
+@patient_required
 def book_appointment(doctor_id):
-    if current_user.user_type != 'patient':
-        flash('Access denied. Patient access only.', 'danger')
-        return redirect(url_for('main.index'))
-
     doctor = User.query.get_or_404(doctor_id)
     if doctor.user_type != 'doctor':
         flash('Invalid doctor selected.', 'danger')
@@ -122,11 +113,8 @@ def book_appointment(doctor_id):
 
 @patient.route('/appointments')
 @login_required
+@patient_required
 def appointments():
-    if current_user.user_type != 'patient':
-        flash('Access denied. Patient access only.', 'danger')
-        return redirect(url_for('main.index'))
-    
     appointments = Appointment.query.filter_by(
         patient_id=current_user.id
     ).order_by(Appointment.date.desc()).all()
@@ -135,11 +123,8 @@ def appointments():
 
 @patient.route('/referrals')
 @login_required
+@patient_required
 def referrals():
-    if current_user.user_type != 'patient':
-        flash('Access denied. Patient access only.', 'danger')
-        return redirect(url_for('main.index'))
-    
     referrals = Referral.query.filter_by(
         patient_id=current_user.id
     ).order_by(Referral.created_at.desc()).all()
@@ -148,12 +133,9 @@ def referrals():
 
 @patient.route('/appointments/<int:appointment_id>/cancel', methods=['POST'])
 @login_required
+@patient_required
 def cancel_appointment(appointment_id):
     """Cancel an appointment."""
-    if current_user.user_type != 'patient':
-        return jsonify({'error': 'Unauthorized'}), 403
-
-    # Use the new relationship to verify ownership
     appointment = Appointment.query.get_or_404(appointment_id)
     if appointment not in current_user.appointments_as_patient:
         return jsonify({'error': 'Unauthorized'}), 403

@@ -1,0 +1,158 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Analytics Dashboard</h2>
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments Over Time -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Daily Appointments (Last 30 Days)</h5>
+            <canvas id="appointmentsChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Doctor Performance -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Doctor Performance</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Total Appointments</th>
+                                    <th>Confirmed</th>
+                                    <th>Success Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in doctor_stats %}
+                                <tr>
+                                    <td>Dr. {{ stat.username }}</td>
+                                    <td>{{ stat.total_appointments }}</td>
+                                    <td>{{ stat.confirmed_appointments }}</td>
+                                    <td>
+                                        {% set rate = (stat.confirmed_appointments / stat.total_appointments * 100) if stat.total_appointments > 0 else 0 %}
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success progress-width" 
+                                                 role="progressbar" 
+                                                 aria-valuenow="{{ rate }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ "%.1f"|format(rate) }}%
+                                            </div>
+                                        </div>
+                                        <script>
+                                            document.currentScript.previousElementSibling.querySelector('.progress-width').style.width = '{{ rate }}%';
+                                        </script>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specialization Distribution -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Doctor Specializations</h5>
+                    <canvas id="specializationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Data Initialization -->
+<script>
+    const chartData = {{ {
+        "appointments": {"labels": daily_appointments|map(attribute="date")|list, "counts": daily_appointments|map(attribute="count")|list},
+        "specializations": {"labels": specialization_stats|map(attribute="specialization")|list, "counts": specialization_stats|map(attribute="count")|list}
+    }|tojson|safe }};
+</script>
+
+<!-- Chart Configuration -->
+<script>
+    // Appointments Chart
+    const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
+    new Chart(appointmentsCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.appointments.labels,
+            datasets: [{
+                label: 'Daily Appointments',
+                data: chartData.appointments.counts,
+                borderColor: '#2C7BE5',
+                backgroundColor: 'rgba(44, 123, 229, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+
+    // Specialization Chart
+    const specializationCtx = document.getElementById('specializationChart').getContext('2d');
+    new Chart(specializationCtx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.specializations.labels,
+            datasets: [{
+                data: chartData.specializations.counts,
+                backgroundColor: [
+                    '#2C7BE5', '#00D4B1', '#A6C5F7', '#45B6FE',
+                    '#7E84A3', '#FF5C5C', '#FFA600'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+</script>
+
+<style>
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+    }
+
+    .progress-bar {
+        line-height: 20px;
+    }
+
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %} 

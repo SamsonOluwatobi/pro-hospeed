@@ -1,0 +1,163 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Reports</h2>
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Controls -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Report Type</label>
+                    <select name="type" class="form-select" onchange="this.form.submit()">
+                        <option value="appointments" {% if report_type == 'appointments' %}selected{% endif %}>Appointments</option>
+                        <option value="users" {% if report_type == 'users' %}selected{% endif %}>Users</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" value="{{ start_date }}" onchange="this.form.submit()">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" value="{{ end_date }}" onchange="this.form.submit()">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" onclick="exportReport()" class="btn btn-success w-100">
+                        <i class="fas fa-download me-2"></i> Export to CSV
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Data -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                {% if report_type == 'appointments' %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in data %}
+                        <tr>
+                            <td>{{ appointment.id }}</td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold">{{ appointment.patient.username }}</div>
+                                    <small class="text-muted">{{ appointment.patient.email }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="fw-bold">Dr. {{ appointment.doctor.username }}</div>
+                                    <small class="text-muted">{{ appointment.doctor.specialization|title }}</small>
+                                </div>
+                            </td>
+                            <td>{{ appointment.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                                    {{ appointment.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ appointment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in data %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'primary' if user.user_type == 'admin' else 'success' if user.user_type == 'doctor' else 'info' }}">
+                                    {{ user.user_type|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if user.is_verified else 'warning' }}">
+                                    {{ 'Verified' if user.is_verified else 'Unverified' }}
+                                </span>
+                            </td>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportReport() {
+    const params = new URLSearchParams(window.location.search);
+    fetch(`/admin/export-report?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            // Create CSV content
+            const csvContent = data.data.map(row => row.join(',')).join('\n');
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', data.filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+}
+</script>
+
+<style>
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 0.5em 0.8em;
+}
+</style>
+{% endblock %} 

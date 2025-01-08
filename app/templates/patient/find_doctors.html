@@ -3,189 +3,260 @@
 {% block title %}Find Doctors{% endblock %}
 
 {% block styles %}
-<!-- Add Leaflet CSS -->
+<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<!-- Leaflet Routing Machine CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <style>
-    #doctorsMap {
-        height: 400px;
+    #map {
+        height: 500px;
         width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 20px;
     }
     .doctor-card {
+        margin-bottom: 15px;
         transition: transform 0.2s;
-        margin-bottom: 20px;
+        cursor: pointer;
     }
     .doctor-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-2px);
     }
-    .search-section {
-        background-color: #f8f9fa;
-        padding: 30px 0;
-        margin-bottom: 30px;
+    .route-info {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+        display: none;
+    }
+    .leaflet-routing-container {
+        background-color: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        max-height: 300px;
+        overflow-y: auto;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Search Section -->
-    <section class="search-section rounded">
-        <div class="container">
-            <h2 class="mb-4">Find a Doctor</h2>
+<div class="container py-4">
+    <!-- Search Form -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
             <form method="POST" class="row g-3">
                 {{ form.hidden_tag() }}
-                <div class="col-md-6">
+                <div class="col-md-8">
                     {{ form.specialization.label(class="form-label") }}
                     {{ form.specialization(class="form-select") }}
                 </div>
-                <div class="col-md-6 d-flex align-items-end">
-                    {{ form.submit(class="btn btn-primary") }}
-                    <button type="button" id="useMyLocation" class="btn btn-outline-primary ms-2">
-                        <i class="fas fa-location-arrow"></i> Use My Location
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search Doctors
                     </button>
                 </div>
             </form>
         </div>
-    </section>
+    </div>
 
-    <!-- Map Section -->
-    <div id="doctorsMap"></div>
-
-    <!-- Doctors List -->
-    <div class="row" id="doctorsList">
-        {% if doctors %}
-            {% for doctor in doctors %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card doctor-card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Dr. {{ doctor.username }}</h5>
-                            <p class="card-text">
-                                <strong>Specialization:</strong> {{ doctor.specialization|title }}<br>
-                                <strong>Location:</strong> {{ doctor.clinic_address }}<br>
-                                <span class="distance-text" data-lat="{{ doctor.latitude }}" data-lng="{{ doctor.longitude }}">
-                                    Calculating distance...
-                                </span>
-                            </p>
-                            <div class="d-grid">
-                                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" 
-                                   class="btn btn-primary">Book Appointment</a>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Find Doctors Near You</h4>
+                    <div id="map"></div>
+                    <div class="route-info">
+                        <h5>Route Information</h5>
+                        <p id="route-distance" class="mb-1"></p>
+                        <p id="route-duration" class="mb-1"></p>
+                    </div>
+                    <button id="useMyLocation" class="btn btn-primary mt-3">
+                        <i class="fas fa-location-arrow me-2"></i>Use My Location
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Available Doctors</h5>
+                    <div id="doctorsList">
+                        {% for doctor in doctors %}
+                        <div class="card doctor-card" onclick="showRoute({{ doctor.latitude }}, {{ doctor.longitude }}, '{{ doctor.username }}')">
+                            <div class="card-body">
+                                <h6 class="card-title">Dr. {{ doctor.username }}</h6>
+                                <p class="card-text mb-1">
+                                    <i class="fas fa-stethoscope me-2"></i>{{ doctor.specialization }}
+                                </p>
+                                <p class="card-text mb-1">
+                                    <i class="fas fa-map-marker-alt me-2"></i><span class="doctor-distance" data-lat="{{ doctor.latitude }}" data-lng="{{ doctor.longitude }}">Calculating...</span>
+                                </p>
+                                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-sm btn-outline-primary mt-2">
+                                    Book Appointment
+                                </a>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12 text-center">
-                <p class="text-muted">No doctors found matching your criteria</p>
             </div>
-        {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Add Leaflet JS -->
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- Leaflet Routing Machine JS -->
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let map = null;
-    let userMarker = null;
-    let doctorMarkers = [];
-    let userPosition = null;
-    const doctorsData = JSON.parse('{{ doctors|tojson|safe }}');
+let map = null;
+let userMarker = null;
+let routingControl = null;
+let userPosition = null;
 
-    // Initialize map
-    function initMap() {
-        map = L.map('doctorsMap').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+function initMap() {
+    map = L.map('map').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add markers for all doctors
+    {% for doctor in doctors %}
+    const doctorMarker = L.marker([{{ doctor.latitude }}, {{ doctor.longitude }}])
+        .addTo(map)
+        .bindPopup(`
+            <strong>Dr. {{ doctor.username }}</strong><br>
+            {{ doctor.specialization }}<br>
+            <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-sm btn-primary mt-2">Book Appointment</a>
+        `);
+    {% endfor %}
+}
+
+function showRoute(doctorLat, doctorLng, doctorName) {
+    if (!userPosition) {
+        alert('Please enable your location first to see the route.');
+        return;
     }
 
-    // Add doctor markers to map
-    function addDoctorMarkers() {
-        doctorsData.forEach(doctor => {
-            const marker = L.marker([doctor.latitude, doctor.longitude])
-                .bindPopup(`
-                    <strong>Dr. ${doctor.username}</strong><br>
-                    ${doctor.specialization}<br>
-                    <a href="/patient/book-appointment/${doctor.id}" class="btn btn-sm btn-primary mt-2">Book Appointment</a>
-                `);
-            doctorMarkers.push(marker);
-            marker.addTo(map);
-        });
-        
-        if (doctorsData.length > 0) {
-            const bounds = L.latLngBounds(doctorsData.map(d => [d.latitude, d.longitude]));
-            map.fitBounds(bounds, { padding: [50, 50] });
+    // Remove existing routing control if it exists
+    if (routingControl) {
+        map.removeControl(routingControl);
+    }
+
+    // Create new routing control
+    routingControl = L.Routing.control({
+        waypoints: [
+            L.latLng(userPosition.lat, userPosition.lng),
+            L.latLng(doctorLat, doctorLng)
+        ],
+        routeWhileDragging: true,
+        showAlternatives: true,
+        altLineOptions: {
+            styles: [
+                {color: 'black', opacity: 0.15, weight: 9},
+                {color: '#6c757d', opacity: 0.8, weight: 6},
+                {color: 'white', opacity: 0.3, weight: 4}
+            ]
+        },
+        lineOptions: {
+            styles: [
+                {color: 'black', opacity: 0.15, weight: 9},
+                {color: '#007bff', opacity: 0.8, weight: 6},
+                {color: 'white', opacity: 0.3, weight: 4}
+            ]
         }
-    }
+    }).addTo(map);
 
-    // Calculate distance between two points
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                 Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return (R * c).toFixed(1);
-    }
-
-    // Update distances for all doctors
-    function updateDistances() {
-        if (!userPosition) return;
+    // Update route information when route is calculated
+    routingControl.on('routesfound', function(e) {
+        const routes = e.routes;
+        const route = routes[0]; // Get the primary route
         
-        document.querySelectorAll('.distance-text').forEach(elem => {
-            const doctorLat = parseFloat(elem.dataset.lat);
-            const doctorLng = parseFloat(elem.dataset.lng);
-            const distance = calculateDistance(
-                userPosition.lat,
-                userPosition.lng,
-                doctorLat,
-                doctorLng
-            );
-            elem.textContent = `Distance: ${distance} km`;
-        });
-    }
-
-    // Handle "Use My Location" button
-    document.getElementById('useMyLocation').addEventListener('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    userPosition = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    
-                    if (userMarker) {
-                        userMarker.setLatLng([userPosition.lat, userPosition.lng]);
-                    } else {
-                        userMarker = L.marker([userPosition.lat, userPosition.lng], {
-                            icon: L.divIcon({
-                                html: '<i class="fas fa-user-circle fa-2x text-primary"></i>',
-                                className: 'user-marker'
-                            })
-                        }).addTo(map);
-                    }
-                    
-                    map.setView([userPosition.lat, userPosition.lng], 12);
-                    updateDistances();
-                },
-                function(error) {
-                    alert('Error getting location: ' + error.message);
-                }
-            );
-        } else {
-            alert('Geolocation is not supported by your browser');
-        }
+        // Show route information
+        document.querySelector('.route-info').style.display = 'block';
+        document.getElementById('route-distance').textContent = `Distance: ${(route.summary.totalDistance / 1000).toFixed(1)} km`;
+        document.getElementById('route-duration').textContent = `Estimated time: ${Math.round(route.summary.totalTime / 60)} minutes`;
     });
 
-    // Initialize map and markers
-    initMap();
-    addDoctorMarkers();
+    // Fit the map to show both points
+    const bounds = L.latLngBounds([
+        [userPosition.lat, userPosition.lng],
+        [doctorLat, doctorLng]
+    ]);
+    map.fitBounds(bounds, { padding: [50, 50] });
+}
+
+function updateDistances() {
+    if (!userPosition) return;
+
+    const distanceElements = document.querySelectorAll('.doctor-distance');
+    distanceElements.forEach(element => {
+        const doctorLat = parseFloat(element.dataset.lat);
+        const doctorLng = parseFloat(element.dataset.lng);
+        const distance = calculateDistance(
+            userPosition.lat,
+            userPosition.lng,
+            doctorLat,
+            doctorLng
+        );
+        element.textContent = `${distance.toFixed(1)} km away`;
+    });
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+document.getElementById('useMyLocation').addEventListener('click', function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                userPosition = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+
+                // Update or create user marker
+                if (userMarker) {
+                    userMarker.setLatLng([userPosition.lat, userPosition.lng]);
+                } else {
+                    userMarker = L.marker([userPosition.lat, userPosition.lng], {
+                        icon: L.divIcon({
+                            html: '<i class="fas fa-user-circle fa-2x text-primary"></i>',
+                            className: 'user-marker',
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12]
+                        })
+                    }).addTo(map);
+                }
+
+                // Center map on user location
+                map.setView([userPosition.lat, userPosition.lng], 13);
+                
+                // Update distances for all doctors
+                updateDistances();
+            },
+            function(error) {
+                alert('Error getting your location: ' + error.message);
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
 });
+
+// Initialize map when page loads
+window.addEventListener('load', initMap);
 </script>
 {% endblock %} 

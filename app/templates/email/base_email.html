@@ -2,42 +2,144 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="format-detection" content="telephone=no">
     <style>
+        /* Base styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #2d3748;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f7fafc;
         }
+        
+        /* Modern Header */
         .header {
-            background-color: #4a90e2;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
             color: white;
-            padding: 20px;
+            padding: 30px 20px;
             text-align: center;
-            border-radius: 5px 5px 0 0;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Content Area */
         .content {
-            padding: 20px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 0 0 5px 5px;
+            padding: 35px;
+            background: #ffffff;
+            border: none;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
         }
+        
+        /* Modern Button */
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: #4a90e2;
-            color: white;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white !important;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
+            border-radius: 8px;
+            margin: 25px 0;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
         }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(74, 144, 226, 0.25);
+        }
+        
+        /* Footer Styling */
         .footer {
             text-align: center;
-            margin-top: 20px;
-            color: #666;
+            margin-top: 30px;
+            color: #718096;
+            font-size: 13px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .footer::before {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4a90e2, transparent);
+            margin: 0 auto 20px;
+        }
+        
+        .unsubscribe {
+            color: #a0aec0;
             font-size: 12px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #edf2f7;
+        }
+        
+        /* Card-like sections */
+        .info-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        /* Animations */
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content > * {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Responsive Design */
+        @media only screen and (max-width: 600px) {
+            body { padding: 15px; }
+            .header { padding: 25px 15px; }
+            .content { padding: 25px; }
+            .button { padding: 12px 24px; width: 100%; box-sizing: border-box; }
+            .info-card { padding: 15px; }
+        }
+        
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            .header { background: #4a90e2; }
+            .button { background: #4a90e2; }
+            .info-card { border-left-color: #4a90e2; }
         }
     </style>
 </head>
@@ -49,8 +151,13 @@
         {% block content %}{% endblock %}
     </div>
     <div class="footer">
-        <p>This email was sent by HoSpeed. Please do not reply to this email.</p>
-        <p>© {{ current_year }} HoSpeed. All rights reserved.</p>
+        <p>This is an automated message from HoSpeed Healthcare.</p>
+        <p>© {{ current_year }} HoSpeed Healthcare. All rights reserved.</p>
+        <div class="unsubscribe">
+            <p>You received this email because you are registered with HoSpeed Healthcare.</p>
+            <p>If you believe this email was sent to you by mistake, please contact our support team.</p>
+            <p>HoSpeed Healthcare | Professional Healthcare Services</p>
+        </div>
     </div>
 </body>
 </html> 
