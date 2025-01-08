@@ -1,37 +1,71 @@
-# HoSpeed - Healthcare Appointment Management System
+# HoSpeed - Healthcare at the Speed of Life 🏥
 
-HoSpeed is a modern web application that streamlines the healthcare appointment booking process, connecting patients with healthcare providers efficiently.
+HoSpeed is a modern healthcare appointment management system that connects patients with healthcare providers efficiently and securely.
 
-## Features
+## Features ✨
 
-- **Smart Doctor Search**: Find healthcare providers based on specialization and location
-- **Real-time Appointment Booking**: Book and manage appointments with instant confirmation
-- **Integrated Referral System**: Seamless referrals between healthcare providers
-- **User-friendly Dashboard**: Separate interfaces for doctors and patients
-- **Schedule Management**: Doctors can manage their availability and appointments
-- **Location-based Services**: Find nearby healthcare providers using maps
+- **User Management**
+  - Patient and Doctor registration
+  - Email verification
+  - Secure authentication
+  - Profile management
 
-## Tech Stack
+- **Appointment System**
+  - Easy appointment scheduling
+  - Real-time availability checking
+  - Appointment confirmation emails
+  - Automated reminders
+  - Rescheduling and cancellation
+
+- **Doctor Features**
+  - Customizable schedule management
+  - Patient history access
+  - Appointment notifications
+  - Clinic location management
+
+- **Patient Features**
+  - Doctor search and filtering
+  - Appointment history
+  - Medical record uploads
+  - Email notifications
+
+- **Admin Dashboard**
+  - User management
+  - Analytics and reporting
+  - System monitoring
+  - Content management
+
+## Technology Stack 🛠️
 
 - **Backend**: Flask (Python)
-- **Database**: SQLAlchemy with PostgreSQL
-- **Frontend**: HTML5, CSS3, JavaScript
-- **UI Framework**: Bootstrap 5
-- **Maps**: Leaflet.js
-- **Icons**: Font Awesome
+- **Database**: PostgreSQL
+- **Authentication**: Flask-Login
+- **Email**: Flask-Mail
+- **Frontend**: Bootstrap 5, JavaScript
+- **Deployment**: Render
+- **Version Control**: Git
 
-## Installation
+## Prerequisites 📋
+
+- Python 3.8+
+- PostgreSQL
+- pip (Python package manager)
+- Virtual environment (recommended)
+
+## Installation 🚀
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd hospeed
+git clone https://github.com/SamsonOluwatobi/pro-hospeed.git
+cd pro-hospeed
 ```
 
-2. Create and activate a virtual environment:
+2. Create and activate virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# OR
+.venv\Scripts\activate  # Windows
 ```
 
 3. Install dependencies:
@@ -45,46 +79,136 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
+Required environment variables:
+- `SECRET_KEY`: Application secret key
+- `SQLALCHEMY_DATABASE_URI`: Database connection string
+- `MAIL_SERVER`: SMTP server address
+- `MAIL_PORT`: SMTP server port
+- `MAIL_USERNAME`: Email username
+- `MAIL_PASSWORD`: Email password
+- `MAIL_USE_TLS`: Use TLS (True/False)
+- `MAIL_USE_SSL`: Use SSL (True/False)
+- `ADMIN_EMAIL`: Admin email address
+
 5. Initialize the database:
 ```bash
 flask db upgrade
 ```
 
-6. Run the development server:
+6. Create admin user:
+```bash
+flask create-admin
+```
+
+7. Run the development server:
 ```bash
 flask run
 ```
 
-## Project Structure
+## Project Structure 📁
 
 ```
 hospeed/
 ├── app/
+│   ├── admin/         # Admin routes and functionality
 │   ├── auth/          # Authentication routes and forms
 │   ├── doctor/        # Doctor-specific functionality
 │   ├── patient/       # Patient-specific functionality
-│   ├── main/          # Main routes
+│   ├── static/        # Static files (CSS, JS, images)
 │   ├── templates/     # HTML templates
+│   ├── email.py       # Email functionality
 │   ├── models.py      # Database models
 │   └── __init__.py    # App initialization
 ├── migrations/        # Database migrations
-├── requirements.txt   # Project dependencies
-└── config.py         # Configuration settings
+├── tests/            # Test files
+├── config.py         # Configuration settings
+├── requirements.txt  # Project dependencies
+└── wsgi.py          # WSGI entry point
 ```
 
-## Contributing
+## API Documentation 📚
+
+### Authentication Endpoints
+
+- `POST /auth/login`: User login
+- `POST /auth/signup`: User registration
+- `GET /auth/verify-email/<token>`: Email verification
+- `POST /auth/reset-password`: Password reset request
+- `POST /auth/reset-password/<token>`: Password reset confirmation
+
+### Patient Endpoints
+
+- `GET /patient/dashboard`: Patient dashboard
+- `GET /patient/appointments`: List patient appointments
+- `POST /patient/book-appointment`: Book new appointment
+- `POST /patient/cancel-appointment/<id>`: Cancel appointment
+
+### Doctor Endpoints
+
+- `GET /doctor/dashboard`: Doctor dashboard
+- `GET /doctor/appointments`: List doctor appointments
+- `POST /doctor/update-schedule`: Update availability
+- `POST /doctor/appointment/<id>/status`: Update appointment status
+
+## Security Features 🔒
+
+- Password hashing using bcrypt
+- CSRF protection
+- Email verification
+- Secure session management
+- Input validation and sanitization
+- SQL injection prevention
+- XSS protection
+
+## Contributing 🤝
 
 1. Fork the repository
 2. Create a new branch (`git checkout -b feature/improvement`)
 3. Make your changes
-4. Commit your changes (`git commit -am 'Add new feature'`)
-5. Push to the branch (`git push origin feature/improvement`)
-6. Create a Pull Request
+4. Run tests (`pytest`)
+5. Commit your changes (`git commit -am 'Add new feature'`)
+6. Push to the branch (`git push origin feature/improvement`)
+7. Create a Pull Request
 
-## License
+## Testing 🧪
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Run the test suite:
+```bash
+pytest
+```
 
-## Contact
+Run with coverage:
+```bash
+coverage run -m pytest
+coverage report
+```
 
-For any queries or support, please contact [Your Contact Information]. 
+## Deployment 🌐
+
+The application is deployed on Render. For deployment:
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Set environment variables
+4. Deploy the main branch
+
+## License 📄
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support 💬
+
+For support, please contact:
+- Email: samtob2002@gmail.com
+- GitHub Issues: [Create an issue](https://github.com/SamsonOluwatobi/pro-hospeed/issues)
+
+## Contributors 👥
+
+- Samson Lana - Backend Developer
+- Kevin Amoni - Backend Developer
+
+## Acknowledgments 🙏
+
+- Flask documentation and community
+- Bootstrap team
+- All contributors and users 
