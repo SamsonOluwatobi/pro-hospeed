@@ -4,7 +4,7 @@
 
 {% block styles %}
 <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <!-- Leaflet Routing Machine CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
 <style>
@@ -14,6 +14,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+        z-index: 1;
     }
     .doctor-card {
         margin-bottom: 15px;
@@ -109,86 +110,108 @@
 
 {% block scripts %}
 <!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <!-- Leaflet Routing Machine JS -->
 <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
     let map = null;
     let userMarker = null;
-let routingControl = null;
+    let routingControl = null;
     let userPosition = null;
 
     function initMap() {
-    map = L.map('map').setView([0, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+        try {
+            // Check if map is already initialized
+            if (map !== null) {
+                map.remove();
+            }
+
+            // Initialize the map with a default view
+            map = L.map('map', {
+                center: [0, 0],
+                zoom: 2,
+                zoomControl: true
+            });
+
+            // Add the tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add markers for all doctors
+            {% for doctor in doctors %}
+            L.marker([{{ doctor.latitude }}, {{ doctor.longitude }}])
+                .addTo(map)
+                .bindPopup(
+                    '<strong>Dr. {{ doctor.username }}</strong><br>' +
+                    '{{ doctor.specialization }}<br>' +
+                    '<a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-sm btn-primary mt-2">Book Appointment</a>'
+                );
+            {% endfor %}
+
+            // Force a map resize after initialization
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        } catch (error) {
+            console.error('Error initializing map:', error);
+        }
+    }
+
+    function showRoute(doctorLat, doctorLng, doctorName) {
+        if (!userPosition) {
+            alert('Please enable your location first to see the route.');
+            return;
+        }
+
+        // Remove existing routing control if it exists
+        if (routingControl) {
+            map.removeControl(routingControl);
+        }
+
+        // Create new routing control
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(userPosition.lat, userPosition.lng),
+                L.latLng(doctorLat, doctorLng)
+            ],
+            routeWhileDragging: true,
+            showAlternatives: true,
+            altLineOptions: {
+                styles: [
+                    {color: 'black', opacity: 0.15, weight: 9},
+                    {color: '#6c757d', opacity: 0.8, weight: 6},
+                    {color: 'white', opacity: 0.3, weight: 4}
+                ]
+            },
+            lineOptions: {
+                styles: [
+                    {color: 'black', opacity: 0.15, weight: 9},
+                    {color: '#007bff', opacity: 0.8, weight: 6},
+                    {color: 'white', opacity: 0.3, weight: 4}
+                ]
+            }
         }).addTo(map);
 
-    // Add markers for all doctors
-    {% for doctor in doctors %}
-    const doctorMarker = L.marker([{{ doctor.latitude }}, {{ doctor.longitude }}])
-        .addTo(map)
-        .bindPopup(`
-            <strong>Dr. {{ doctor.username }}</strong><br>
-            {{ doctor.specialization }}<br>
-            <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-sm btn-primary mt-2">Book Appointment</a>
-        `);
-    {% endfor %}
-}
+        // Update route information when route is calculated
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            const route = routes[0]; // Get the primary route
+            
+            // Show route information
+            document.querySelector('.route-info').style.display = 'block';
+            document.getElementById('route-distance').textContent = `Distance: ${(route.summary.totalDistance / 1000).toFixed(1)} km`;
+            document.getElementById('route-duration').textContent = `Estimated time: ${Math.round(route.summary.totalTime / 60)} minutes`;
+        });
 
-function showRoute(doctorLat, doctorLng, doctorName) {
-    if (!userPosition) {
-        alert('Please enable your location first to see the route.');
-        return;
+        // Fit the map to show both points
+        const bounds = L.latLngBounds([
+            [userPosition.lat, userPosition.lng],
+            [doctorLat, doctorLng]
+        ]);
+        map.fitBounds(bounds, { padding: [50, 50] });
     }
-
-    // Remove existing routing control if it exists
-    if (routingControl) {
-        map.removeControl(routingControl);
-    }
-
-    // Create new routing control
-    routingControl = L.Routing.control({
-        waypoints: [
-            L.latLng(userPosition.lat, userPosition.lng),
-            L.latLng(doctorLat, doctorLng)
-        ],
-        routeWhileDragging: true,
-        showAlternatives: true,
-        altLineOptions: {
-            styles: [
-                {color: 'black', opacity: 0.15, weight: 9},
-                {color: '#6c757d', opacity: 0.8, weight: 6},
-                {color: 'white', opacity: 0.3, weight: 4}
-            ]
-        },
-        lineOptions: {
-            styles: [
-                {color: 'black', opacity: 0.15, weight: 9},
-                {color: '#007bff', opacity: 0.8, weight: 6},
-                {color: 'white', opacity: 0.3, weight: 4}
-            ]
-        }
-    }).addTo(map);
-
-    // Update route information when route is calculated
-    routingControl.on('routesfound', function(e) {
-        const routes = e.routes;
-        const route = routes[0]; // Get the primary route
-        
-        // Show route information
-        document.querySelector('.route-info').style.display = 'block';
-        document.getElementById('route-distance').textContent = `Distance: ${(route.summary.totalDistance / 1000).toFixed(1)} km`;
-        document.getElementById('route-duration').textContent = `Estimated time: ${Math.round(route.summary.totalTime / 60)} minutes`;
-    });
-
-    // Fit the map to show both points
-    const bounds = L.latLngBounds([
-        [userPosition.lat, userPosition.lng],
-        [doctorLat, doctorLng]
-    ]);
-    map.fitBounds(bounds, { padding: [50, 50] });
-}
 
     function updateDistances() {
         if (!userPosition) return;
