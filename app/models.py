@@ -2,6 +2,9 @@ from app import db, login_manager
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from time import time
+import jwt
+from flask import current_app
 
 @login_manager.user_loader
 def load_user(id):
@@ -14,6 +17,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_type = db.Column(db.String(20), nullable=False)  # 'patient' or 'doctor'
+    is_verified = db.Column(db.Boolean, default=False)
     
     # Doctor-specific fields
     specialization = db.Column(db.String(100))
@@ -67,6 +71,38 @@ class User(UserMixin, db.Model):
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def get_reset_password_token(self, expires_in=3600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+    
+    def get_verification_token(self, expires_in=86400):
+        return jwt.encode(
+            {'verify_email': self.id, 'exp': time() + expires_in},
+            current_app.config['SECRET_KEY'],
+            algorithm='HS256'
+        )
+    
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                          algorithms=['HS256'])['reset_password']
+            return User.query.get(id)
+        except:
+            return None
+    
+    @staticmethod
+    def verify_email_token(token):
+        try:
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
+                          algorithms=['HS256'])['verify_email']
+            return User.query.get(id)
+        except:
+            return None
     
     def __repr__(self):
         return f'<User {self.username}>'

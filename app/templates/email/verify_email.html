@@ -1,0 +1,22 @@
+{% extends "email/base_email.html" %}
+
+{% block title %}Verify Your Email{% endblock %}
+
+{% block content %}
+<p>Dear {{ user.username }},</p>
+
+<p>Welcome to HoSpeed! Please verify your email address by clicking the button below:</p>
+
+<p style="text-align: center;">
+    <a href="{{ url_for('auth.verify_email', token=token, _external=True) }}" class="button">
+        Verify Email
+    </a>
+</p>
+
+<p>This verification link will expire in 24 hours.</p>
+
+<p>If you did not create an account with HoSpeed, please ignore this email.</p>
+
+<p>Best regards,<br>
+The HoSpeed Team</p>
+{% endblock %} 

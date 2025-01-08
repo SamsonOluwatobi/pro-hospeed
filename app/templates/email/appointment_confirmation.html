@@ -1,0 +1,33 @@
+{% extends "email/base_email.html" %}
+
+{% block title %}Appointment Confirmation{% endblock %}
+
+{% block content %}
+<p>Dear {{ appointment.patient.username }},</p>
+
+<p>Your appointment has been confirmed with the following details:</p>
+
+<div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.username }}</p>
+    <p><strong>Specialization:</strong> {{ appointment.doctor.specialization }}</p>
+    <p><strong>Date:</strong> {{ appointment.date.strftime('%B %d, %Y') }}</p>
+    <p><strong>Time:</strong> {{ appointment.date.strftime('%I:%M %p') }}</p>
+    <p><strong>Location:</strong> {{ appointment.doctor.clinic_address }}</p>
+</div>
+
+<p><strong>Important Notes:</strong></p>
+<ul>
+    <li>Please arrive 15 minutes before your appointment time</li>
+    <li>Bring any relevant medical records or test results</li>
+    <li>If you need to cancel or reschedule, please do so at least 24 hours in advance</li>
+</ul>
+
+<p style="text-align: center;">
+    <a href="{{ url_for('patient.view_appointment', appointment_id=appointment.id, _external=True) }}" class="button">
+        View Appointment Details
+    </a>
+</p>
+
+<p>Best regards,<br>
+The HoSpeed Team</p>
+{% endblock %} 
