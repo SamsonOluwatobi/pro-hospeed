@@ -37,21 +37,21 @@
                         <!-- Basic Information -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.username.label(class="form-label") }}
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
                                     {{ form.username(class="form-control", placeholder="Choose a username") }}
-                                    {% for error in form.username.errors %}
-                                        <span class="text-danger">{{ error }}</span>
-                                    {% endfor %}
-                                </div>
+                            {% for error in form.username.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.email.label(class="form-label") }}
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
                                     {{ form.email(class="form-control", placeholder="Enter your email") }}
-                                    {% for error in form.email.errors %}
-                                        <span class="text-danger">{{ error }}</span>
-                                    {% endfor %}
+                            {% for error in form.email.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -59,31 +59,31 @@
                         <!-- Password Fields -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.password.label(class="form-label") }}
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
                                     <div class="input-group">
                                         {{ form.password(class="form-control", placeholder="Create a password") }}
                                         <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    {% for error in form.password.errors %}
-                                        <span class="text-danger">{{ error }}</span>
-                                    {% endfor %}
-                                </div>
+                            {% for error in form.password.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form.password2.label(class="form-label") }}
+                        <div class="mb-3">
+                            {{ form.password2.label(class="form-label") }}
                                     <div class="input-group">
                                         {{ form.password2(class="form-control", placeholder="Confirm your password") }}
                                         <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password2')">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
-                                    {% for error in form.password2.errors %}
-                                        <span class="text-danger">{{ error }}</span>
-                                    {% endfor %}
+                            {% for error in form.password2.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -96,26 +96,26 @@
                                 <span class="text-danger">{{ error }}</span>
                             {% endfor %}
                         </div>
-
+                        
                         <!-- Doctor-specific Fields -->
                         <div id="doctorFields" style="display: none;">
                             <div class="row mb-4">
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.specialization.label(class="form-label") }}
+                            <div class="mb-3">
+                                {{ form.specialization.label(class="form-label") }}
                                         {{ form.specialization(class="form-select") }}
-                                        {% for error in form.specialization.errors %}
-                                            <span class="text-danger">{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
+                                {% for error in form.specialization.errors %}
+                                    <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
+                            </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.license_number.label(class="form-label") }}
+                            <div class="mb-3">
+                                {{ form.license_number.label(class="form-label") }}
                                         {{ form.license_number(class="form-control", placeholder="Enter your medical license number") }}
-                                        {% for error in form.license_number.errors %}
-                                            <span class="text-danger">{{ error }}</span>
-                                        {% endfor %}
+                                {% for error in form.license_number.errors %}
+                                    <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
                                     </div>
                                 </div>
                             </div>
@@ -127,38 +127,38 @@
                                     <span class="text-danger">{{ error }}</span>
                                 {% endfor %}
                             </div>
-
+                            
                             <div class="mb-4">
                                 {{ form.location_method.label(class="form-label") }}
                                 {{ form.location_method(class="form-select", onchange="handleLocationMethod(this.value)") }}
                             </div>
-
+                            
                             <div id="manualCoordinates" class="row mb-4" style="display: none;">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.latitude.label(class="form-label") }}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.latitude.label(class="form-label") }}
                                         {{ form.latitude(class="form-control", placeholder="Enter latitude") }}
-                                        {% for error in form.latitude.errors %}
-                                            <span class="text-danger">{{ error }}</span>
-                                        {% endfor %}
+                                            {% for error in form.latitude.errors %}
+                                                <span class="text-danger">{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        {{ form.longitude.label(class="form-label") }}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.longitude.label(class="form-label") }}
                                         {{ form.longitude(class="form-control", placeholder="Enter longitude") }}
-                                        {% for error in form.longitude.errors %}
-                                            <span class="text-danger">{{ error }}</span>
-                                        {% endfor %}
+                                            {% for error in form.longitude.errors %}
+                                                <span class="text-danger">{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
                             <div id="mapPicker" style="display: none;">
                                 <div id="map" style="height: 400px;" class="mb-4"></div>
                             </div>
                         </div>
-
+                        
                         <div class="d-grid gap-2">
                             {{ form.submit(class="btn btn-primary btn-lg") }}
                             <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">Already have an account? Login</a>
@@ -195,10 +195,10 @@ function togglePassword(fieldId) {
 document.getElementById('user_type').addEventListener('change', function() {
     const doctorFields = document.getElementById('doctorFields');
     if (this.value === 'doctor') {
-        doctorFields.style.display = 'block';
-    } else {
-        doctorFields.style.display = 'none';
-    }
+            doctorFields.style.display = 'block';
+        } else {
+            doctorFields.style.display = 'none';
+        }
 });
 
 let map = null;
@@ -210,17 +210,17 @@ function initMap() {
         map.remove();
     }
 
-    map = L.map('map').setView([0, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
+            map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
     // Add click event to map
-    map.on('click', function(e) {
-        const lat = e.latlng.lat.toFixed(6);
-        const lng = e.latlng.lng.toFixed(6);
-        updateMarker(lat, lng);
-    });
+            map.on('click', function(e) {
+                const lat = e.latlng.lat.toFixed(6);
+                const lng = e.latlng.lng.toFixed(6);
+                updateMarker(lat, lng);
+            });
 
     // If coordinates are already set, show marker
     const lat = document.getElementById('latitude').value;
@@ -231,13 +231,13 @@ function initMap() {
 }
 
 // Update marker position and form fields
-function updateMarker(lat, lng) {
+    function updateMarker(lat, lng) {
     document.getElementById('latitude').value = lat;
     document.getElementById('longitude').value = lng;
 
-    if (marker) {
-        marker.setLatLng([lat, lng]);
-    } else {
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
         marker = L.marker([lat, lng], {
             draggable: true
         }).addTo(map);
@@ -248,9 +248,9 @@ function updateMarker(lat, lng) {
             updateMarker(position.lat.toFixed(6), position.lng.toFixed(6));
         });
     }
-    map.setView([lat, lng], 13);
-}
-
+        map.setView([lat, lng], 13);
+    }
+    
 // Handle location method selection
 function handleLocationMethod(method) {
     const manualCoords = document.getElementById('manualCoordinates');
@@ -264,7 +264,7 @@ function handleLocationMethod(method) {
     } else if (method === 'map') {
         mapPicker.style.display = 'block';
         setTimeout(() => {
-            initMap();
+                initMap();
             map.invalidateSize();
         }, 100);
     } else if (method === 'current') {
@@ -274,11 +274,11 @@ function handleLocationMethod(method) {
 
 // Get current location
 function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const lat = position.coords.latitude.toFixed(6);
-                const lng = position.coords.longitude.toFixed(6);
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lng = position.coords.longitude.toFixed(6);
                 document.getElementById('latitude').value = lat;
                 document.getElementById('longitude').value = lng;
 
@@ -286,15 +286,15 @@ function getCurrentLocation() {
                 document.getElementById('mapPicker').style.display = 'block';
                 setTimeout(() => {
                     initMap();
-                    updateMarker(lat, lng);
+                                updateMarker(lat, lng);
                     map.invalidateSize();
                 }, 100);
-            },
-            function(error) {
-                alert('Error getting location: ' + error.message);
-            }
-        );
-    } else {
+                        },
+                        function(error) {
+                            alert('Error getting location: ' + error.message);
+                        }
+                    );
+                } else {
         alert('Geolocation is not supported by this browser.');
     }
 }
