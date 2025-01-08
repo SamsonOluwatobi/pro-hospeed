@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from config import Config
+from app.email import mail
+from datetime import datetime
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -18,6 +20,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    mail.init_app(app)
 
     with app.app_context():
         # Import and register blueprints
@@ -43,6 +46,12 @@ def create_app(config_class=Config):
 
         # Create database tables
         db.create_all()
+
+    @app.context_processor
+    def utility_processor():
+        return {
+            'now': datetime.utcnow()
+        }
 
     return app
 

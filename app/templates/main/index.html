@@ -1,265 +1,435 @@
-{% extends "base.html" %}
-
-{% block styles %}
-<style>
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
-        color: white;
-        padding: 120px 0;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80') center/cover;
-        opacity: 0.1;
-    }
-    
-    .hero-content {
-        position: relative;
-        z-index: 1;
-    }
-    
-    /* Features Section */
-    .features-section {
-        padding: 80px 0;
-        background: #f8f9fa;
-    }
-    
-    .feature-card {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-        border: none;
-    }
-    
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-    }
-    
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    
-    /* How It Works Section */
-    .how-it-works {
-        padding: 80px 0;
-    }
-    
-    .step-card {
-        text-align: center;
-        padding: 20px;
-    }
-    
-    .step-number {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        font-weight: bold;
-    }
-    
-    /* Stats Section */
-    .stats-section {
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
-        color: white;
-        padding: 60px 0;
-    }
-    
-    .stat-item {
-        text-align: center;
-        padding: 20px;
-    }
-    
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    
-    /* CTA Section */
-    .cta-section {
-        padding: 100px 0;
-        background: #f8f9fa;
-        text-align: center;
-    }
-    
-    .btn-gradient {
-        background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        border-radius: 30px;
-        font-weight: 600;
-        transition: transform 0.3s ease;
-    }
-    
-    .btn-gradient:hover {
-        transform: translateY(-3px);
-        color: white;
-    }
-</style>
-{% endblock %}
+{% extends "base_main.html" %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center hero-content">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">Healthcare at the Speed of Life</h1>
-                <p class="lead mb-5">Connect with trusted healthcare professionals instantly. Book appointments, manage referrals, and take control of your health journey with HoSpeed.</p>
-                {% if not current_user.is_authenticated %}
-                    <div class="d-grid gap-3 d-sm-flex">
-                        <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-5">Get Started</a>
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-5">Sign In</a>
+<div class="container-fluid p-0">
+    {% if current_user.is_authenticated %}
+        <!-- Dashboard Quick Links -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Welcome back, {{ current_user.username }}!</h4>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    {% if current_user.user_type == 'doctor' %}
+                                        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-clinic-medical"></i> Doctor Dashboard
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('patient.dashboard') }}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-user"></i> Patient Dashboard
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <a href="{{ url_for('main.profile') }}" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-user-circle"></i> My Profile
+                                    </a>
+                                </div>
+                            </div>
+                            {% if not current_user.is_verified %}
+                            <div class="col-md-4">
+                                <div class="d-grid">
+                                    <a href="{{ url_for('auth.resend_verification') }}" class="btn btn-warning btn-lg">
+                                        <i class="fas fa-envelope"></i> Verify Email
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                {% endif %}
-            </div>
-            <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80" 
-                     class="img-fluid rounded-3 shadow" alt="Healthcare professionals">
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Features Section -->
-<section class="features-section">
-    <div class="container">
-        <h2 class="text-center mb-5">Why Choose HoSpeed?</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="fas fa-search feature-icon"></i>
-                    <h4>Smart Doctor Search</h4>
-                    <p>Find the right healthcare professional based on specialization, location, and availability. View detailed profiles and make informed decisions.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="fas fa-calendar-check feature-icon"></i>
-                    <h4>Easy Scheduling</h4>
-                    <p>Book appointments instantly with real-time availability. Manage your medical schedule effortlessly with automated reminders.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="fas fa-file-medical feature-icon"></i>
-                    <h4>Seamless Referrals</h4>
-                    <p>Experience smooth transitions between healthcare providers with our integrated referral system. Track referral status in real-time.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- How It Works Section -->
-<section class="how-it-works">
-    <div class="container">
-        <h2 class="text-center mb-5">How It Works</h2>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h5>Sign Up</h5>
-                    <p>Create your account as a patient or healthcare provider</p>
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            {% if current_user.user_type == 'doctor' %}
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Appointments</h5>
+                            <h2 class="mb-0">{{ current_user.appointments_as_doctor|selectattr('status', 'equalto', 'pending')|list|length }}</h2>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h5>Find Doctors</h5>
-                    <p>Search for specialists near you using our smart filters</p>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Available Slots</h5>
+                            <h2 class="mb-0">{{ current_user.schedules|selectattr('is_available', 'equalto', true)|list|length }}</h2>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h5>Book Appointment</h5>
-                    <p>Select a convenient time slot and book instantly</p>
+            {% else %}
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">My Appointments</h5>
+                            <h2 class="mb-0">{{ current_user.appointments_as_patient|length }}</h2>
+                        </div>
+                    </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Appointments</h5>
+                            <h2 class="mb-0">{{ current_user.appointments_as_patient|selectattr('status', 'equalto', 'pending')|list|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Hero Carousel Section -->
+        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
             </div>
-            <div class="col-md-3">
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h5>Get Care</h5>
-                    <p>Visit your doctor and receive quality healthcare</p>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="carousel-content bg-gradient-1">
+                        <div class="container">
+                            <div class="row align-items-center min-vh-75">
+                                <div class="col-lg-6">
+                                    <h1 class="display-3 text-white fw-bold mb-4">Welcome to HoSpeed</h1>
+                                    <p class="lead text-white mb-4">Schedule medical appointments with ease. Connect with qualified healthcare professionals instantly.</p>
+                                    <div class="d-flex gap-3">
+                                        <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-4">Get Started</a>
+                                        <a href="#features" class="btn btn-outline-light btn-lg px-4">Learn More</a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <img src="{{ url_for('static', filename='images/hero-1.svg') }}" alt="Healthcare" class="img-fluid floating-animation">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-content bg-gradient-2">
+                        <div class="container">
+                            <div class="row align-items-center min-vh-75">
+                                <div class="col-lg-6">
+                                    <h1 class="display-3 text-white fw-bold mb-4">Find Your Doctor</h1>
+                                    <p class="lead text-white mb-4">Browse through our network of qualified healthcare professionals and choose the best match for your needs.</p>
+                                    <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-4">Find Doctors</a>
+                                </div>
+                                <div class="col-lg-6">
+                                    <img src="{{ url_for('static', filename='images/hero-2.svg') }}" alt="Doctors" class="img-fluid floating-animation">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-content bg-gradient-3">
+                        <div class="container">
+                            <div class="row align-items-center min-vh-75">
+                                <div class="col-lg-6">
+                                    <h1 class="display-3 text-white fw-bold mb-4">Smart Healthcare</h1>
+                                    <p class="lead text-white mb-4">Experience modern healthcare with automated reminders, digital prescriptions, and seamless communication.</p>
+                                    <a href="{{ url_for('auth.signup') }}" class="btn btn-light btn-lg px-4">Join Now</a>
+                                </div>
+                                <div class="col-lg-6">
+                                    <img src="{{ url_for('static', filename='images/hero-3.svg') }}" alt="Smart Healthcare" class="img-fluid floating-animation">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Stats Section -->
-<section class="stats-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="stat-item">
-                    <div class="stat-number">1000+</div>
-                    <div>Healthcare Providers</div>
+        <!-- Features Section -->
+        <section id="features" class="py-5">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col-lg-6 mx-auto">
+                        <h2 class="display-5 fw-bold mb-3">Why Choose HoSpeed?</h2>
+                        <p class="lead text-muted">Experience healthcare reimagined with our innovative platform</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon bg-primary-soft">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <h4 class="mt-4 mb-3">Easy Scheduling</h4>
+                            <p class="text-muted">Book appointments with just a few clicks. Choose your preferred doctor and time slot with our intuitive interface.</p>
+                            <div class="feature-hover">
+                                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Try Now</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon bg-success-soft">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <h4 class="mt-4 mb-3">Qualified Doctors</h4>
+                            <p class="text-muted">Connect with verified healthcare professionals across various specializations, all vetted for quality care.</p>
+                            <div class="feature-hover">
+                                <a href="{{ url_for('auth.signup') }}" class="btn btn-success">Find Doctors</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon bg-info-soft">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h4 class="mt-4 mb-3">Smart Reminders</h4>
+                            <p class="text-muted">Never miss an appointment with our automated reminder system. Get notifications via email and SMS.</p>
+                            <div class="feature-hover">
+                                <a href="{{ url_for('auth.signup') }}" class="btn btn-info text-white">Get Started</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-item">
-                    <div class="stat-number">50,000+</div>
-                    <div>Appointments Booked</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-item">
-                    <div class="stat-number">98%</div>
-                    <div>Patient Satisfaction</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        </section>
 
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="container">
-        <h2 class="mb-4">Ready to Transform Your Healthcare Experience?</h2>
-        <p class="lead mb-5">Join thousands of satisfied users who have chosen HoSpeed for their healthcare needs.</p>
-        {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('auth.signup') }}" class="btn btn-gradient btn-lg">Get Started Now</a>
-        {% endif %}
-    </div>
-</section>
-{% endblock %}
+        <!-- Stats Section -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number" data-count="1000">0</div>
+                            <p class="text-muted mb-0">Happy Patients</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number" data-count="50">0</div>
+                            <p class="text-muted mb-0">Expert Doctors</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number" data-count="5000">0</div>
+                            <p class="text-muted mb-0">Appointments</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number" data-count="10">0</div>
+                            <p class="text-muted mb-0">Specialties</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works Section -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col-lg-6 mx-auto">
+                        <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                        <p class="lead text-muted">Simple steps to get started with HoSpeed</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <h5 class="mt-4">Sign Up</h5>
+                            <p class="text-muted">Create your account in minutes</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <h5 class="mt-4">Find Doctor</h5>
+                            <p class="text-muted">Browse through our network</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <h5 class="mt-4">Book Appointment</h5>
+                            <p class="text-muted">Select your preferred time</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="step-card">
+                            <div class="step-number">4</div>
+                            <h5 class="mt-4">Get Care</h5>
+                            <p class="text-muted">Meet your doctor and get care</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>
+
+<style>
+/* Carousel Styles */
+.carousel-content {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+}
+
+.bg-gradient-1 {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.bg-gradient-2 {
+    background: linear-gradient(135deg, #4158D0 0%, #C850C0 100%);
+}
+
+.bg-gradient-3 {
+    background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%);
+}
+
+.floating-animation {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Feature Cards */
+.feature-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 2rem;
+}
+
+.bg-primary-soft { background: rgba(44, 123, 229, 0.1); color: var(--primary-color); }
+.bg-success-soft { background: rgba(0, 212, 177, 0.1); color: #00D4B1; }
+.bg-info-soft { background: rgba(255, 107, 107, 0.1); color: var(--accent-color); }
+
+.feature-hover {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: white;
+    transition: bottom 0.3s ease;
+}
+
+.feature-card:hover .feature-hover {
+    bottom: 0;
+}
+
+/* Stats Section */
+.stat-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Step Cards */
+.step-card {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .carousel-content {
+        min-height: 100vh;
+        text-align: center;
+    }
+    
+    .floating-animation {
+        margin-top: 2rem;
+    }
+}
+</style>
 
 {% block scripts %}
 <script>
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
+// Animate stats numbers
+document.addEventListener('DOMContentLoaded', function() {
+    const stats = document.querySelectorAll('.stat-number');
+    
+    const animateValue = (obj, start, end, duration) => {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = entry.target;
+                const end = parseInt(target.getAttribute('data-count'));
+                animateValue(target, 0, end, 2000);
+                observer.unobserve(target);
+            }
         });
-    });
+    }, { threshold: 0.5 });
+
+    stats.forEach(stat => observer.observe(stat));
+});
 </script>
+{% endblock %}
 {% endblock %}

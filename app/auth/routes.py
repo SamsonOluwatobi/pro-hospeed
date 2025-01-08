@@ -2,8 +2,10 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
 from app.models import User
-from app.auth.forms import LoginForm, SignupForm
+from app.auth.forms import LoginForm, SignupForm, ChangePasswordForm
+from app.email import send_verification_email
 from urllib.parse import urlparse
+import traceback
 
 auth = Blueprint('auth', __name__)
 
@@ -42,32 +44,77 @@ def signup():
     
     form = SignupForm()
     if form.validate_on_submit():
-        user = User(
-            username=form.username.data,
-            email=form.email.data.lower(),
-            user_type=form.user_type.data
-        )
-        
-        # Set doctor-specific fields if user is a doctor
-        if form.user_type.data == 'doctor':
-            user.specialization = form.specialization.data
-            user.license_number = form.license_number.data
-            user.clinic_address = form.clinic_address.data
-            user.latitude = float(form.latitude.data)
-            user.longitude = float(form.longitude.data)
-        
-        user.set_password(form.password.data)
-        db.session.add(user)
         try:
+            user = User(
+                username=form.username.data,
+                email=form.email.data.lower(),
+                user_type=form.user_type.data
+            )
+            
+            # Set doctor-specific fields if user is a doctor
+            if form.user_type.data == 'doctor':
+                user.specialization = form.specialization.data
+                user.license_number = form.license_number.data
+                user.clinic_address = form.clinic_address.data
+                user.latitude = float(form.latitude.data)
+                user.longitude = float(form.longitude.data)
+            
+            user.set_password(form.password.data)
+            db.session.add(user)
             db.session.commit()
-            flash('Congratulations, you are now registered!', 'success')
-            return redirect(url_for('auth.login'))
+            
+            # Send verification email
+            try:
+                send_verification_email(user)
+                flash('Congratulations, you are now registered! Please check your email to verify your account.', 'success')
+                return redirect(url_for('auth.login'))
+            except Exception as e:
+                print(f"Error sending verification email: {str(e)}")
+                print(traceback.format_exc())
+                flash('Registration successful but there was an error sending the verification email. Please contact support.', 'warning')
+                return redirect(url_for('auth.login'))
+                
         except Exception as e:
+            print(f"Error during registration: {str(e)}")
+            print(traceback.format_exc())
             db.session.rollback()
             flash('An error occurred during registration.', 'danger')
             return redirect(url_for('auth.signup'))
     
     return render_template('auth/signup.html', title='Sign Up', form=form)
+
+@auth.route('/verify-email/<token>')
+def verify_email(token):
+    """Verify user's email with token."""
+    if current_user.is_authenticated and current_user.is_verified:
+        return redirect(url_for('main.index'))
+    
+    user = User.verify_email_token(token)
+    if not user:
+        flash('Invalid or expired verification link.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    user.is_verified = True
+    db.session.commit()
+    flash('Your email has been verified! You can now log in.', 'success')
+    return redirect(url_for('auth.login'))
+
+@auth.route('/resend-verification')
+@login_required
+def resend_verification():
+    """Resend verification email."""
+    if current_user.is_verified:
+        return redirect(url_for('main.index'))
+    
+    try:
+        send_verification_email(current_user)
+        flash('A new verification email has been sent. Please check your inbox.', 'info')
+    except Exception as e:
+        print(f"Error resending verification email: {str(e)}")
+        print(traceback.format_exc())
+        flash('Error sending verification email. Please try again later.', 'danger')
+    
+    return redirect(url_for('main.index'))
 
 @auth.route('/logout')
 @login_required
@@ -75,4 +122,19 @@ def logout():
     """Handle user logout."""
     logout_user()
     flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('main.index')) 
+    return redirect(url_for('main.index'))
+
+@auth.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Handle password change."""
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.check_password(form.current_password.data):
+            current_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash('Your password has been updated.', 'success')
+            return redirect(url_for('main.profile'))
+        else:
+            flash('Current password is incorrect.', 'danger')
+    return render_template('auth/change_password.html', form=form) 

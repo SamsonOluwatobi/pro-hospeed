@@ -1,30 +1,24 @@
 from flask import current_app, render_template
-from flask_mail import Message
-import requests
+from flask_mail import Message, Mail
 from threading import Thread
+from datetime import datetime
+
+mail = Mail()
 
 def send_async_email(app, msg):
     with app.app_context():
         try:
-            mailgun_domain = app.config['MAILGUN_DOMAIN']
-            mailgun_api_key = app.config['MAILGUN_API_KEY']
-            
-            response = requests.post(
-                f"https://api.mailgun.net/v3/{mailgun_domain}/messages",
-                auth=("api", mailgun_api_key),
-                data={
-                    "from": f"HoSpeed <mailgun@{mailgun_domain}>",
-                    "to": msg.recipients,
-                    "subject": msg.subject,
-                    "html": msg.html
-                }
-            )
-            response.raise_for_status()
+            mail.send(msg)
         except Exception as e:
             print(f"Error sending email: {str(e)}")
 
 def send_email(subject, recipients, html_body):
-    msg = Message(subject=subject, recipients=recipients, html=html_body)
+    msg = Message(
+        subject=subject,
+        sender=('HoSpeed', current_app.config['MAIL_USERNAME']),
+        recipients=recipients,
+        html=html_body
+    )
     Thread(target=send_async_email,
            args=(current_app._get_current_object(), msg)).start()
 
@@ -34,7 +28,8 @@ def send_password_reset_email(user):
         '[HoSpeed] Reset Your Password',
         recipients=[user.email],
         html_body=render_template('email/reset_password.html',
-                                user=user, token=token)
+                                user=user, token=token,
+                                current_year=datetime.now().year)
     )
 
 def send_verification_email(user):
@@ -43,7 +38,8 @@ def send_verification_email(user):
         '[HoSpeed] Verify Your Email',
         recipients=[user.email],
         html_body=render_template('email/verify_email.html',
-                                user=user, token=token)
+                                user=user, token=token,
+                                current_year=datetime.now().year)
     )
 
 def send_appointment_confirmation(appointment):
@@ -51,7 +47,8 @@ def send_appointment_confirmation(appointment):
         '[HoSpeed] Appointment Confirmation',
         recipients=[appointment.patient.email],
         html_body=render_template('email/appointment_confirmation.html',
-                                appointment=appointment)
+                                appointment=appointment,
+                                current_year=datetime.now().year)
     )
 
 def send_appointment_reminder(appointment):
@@ -59,7 +56,8 @@ def send_appointment_reminder(appointment):
         '[HoSpeed] Appointment Reminder',
         recipients=[appointment.patient.email],
         html_body=render_template('email/appointment_reminder.html',
-                                appointment=appointment)
+                                appointment=appointment,
+                                current_year=datetime.now().year)
     )
 
 def send_doctor_notification(appointment):
@@ -67,5 +65,6 @@ def send_doctor_notification(appointment):
         '[HoSpeed] New Appointment Request',
         recipients=[appointment.doctor.email],
         html_body=render_template('email/doctor_notification.html',
-                                appointment=appointment)
+                                appointment=appointment,
+                                current_year=datetime.now().year)
     ) 

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app
+from flask import Blueprint, render_template, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.email import send_email
 
@@ -16,11 +16,18 @@ def profile():
 @main.route('/test-email')
 def test_email():
     try:
+        # Get admin email from config
+        admin_email = current_app.config['ADMINS'][0]
+        
+        # Send test email
         send_email(
             subject='Test Email from HoSpeed',
-            recipients=[current_app.config['ADMINS'][0]],
+            recipients=[admin_email],
             html_body=render_template('email/test_email.html')
         )
-        return 'Test email sent! Check your inbox.'
+        flash('Test email sent successfully! Please check your inbox.', 'success')
+        return redirect(url_for('main.index'))
     except Exception as e:
-        return f'Error sending email: {str(e)}' 
+        current_app.logger.error(f'Error sending test email: {str(e)}')
+        flash(f'Error sending email: {str(e)}', 'error')
+        return redirect(url_for('main.index')) 

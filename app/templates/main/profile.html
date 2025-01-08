@@ -1,22 +1,175 @@
 {% extends "base_main.html" %}
 
-{% block title %}Profile{% endblock %}
-
 {% block content %}
-<div class="container">
+<div class="container py-5">
+    <!-- Profile Header -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="avatar-circle">
+                        {{ current_user.username[0].upper() }}
+                    </div>
+                </div>
+                <div class="col">
+                    <h2 class="mb-1">{{ current_user.username }}
+                        {% if current_user.is_verified %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-exclamation-circle"></i> Unverified
+                                <a href="{{ url_for('auth.resend_verification') }}" class="text-white ms-2">
+                                    <small>Verify Now</small>
+                                </a>
+                            </span>
+                        {% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">{{ current_user.email }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h4>User Profile</h4>
+        <!-- User Information -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Account Information</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Username:</strong> {{ current_user.username }}</p>
-                    <p><strong>Email:</strong> {{ current_user.email }}</p>
-                    <p><strong>Member since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <strong>Account Type:</strong>
+                            <span class="badge bg-primary">{{ current_user.user_type.title() }}</span>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Member Since:</strong>
+                            <span>{{ current_user.created_at.strftime('%B %d, %Y') }}</span>
+                        </li>
+                        {% if current_user.user_type == 'doctor' %}
+                        <li class="mb-3">
+                            <strong>Specialization:</strong>
+                            <span>{{ current_user.specialization }}</span>
+                        </li>
+                        <li class="mb-3">
+                            <strong>License Number:</strong>
+                            <span>{{ current_user.license_number }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Summary -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Activity Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_user.user_type == 'doctor' %}
+                    <div class="mb-4">
+                        <h6>Appointments</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="mb-0">{{ current_user.appointments_as_doctor|length }}</h3>
+                                    <small class="text-muted">Total Appointments</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="mb-0">{{ current_user.schedules|length }}</h3>
+                                    <small class="text-muted">Available Slots</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <h6>Your Appointments</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="mb-0">{{ current_user.appointments_as_patient|length }}</h3>
+                                    <small class="text-muted">Total Appointments</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded">
+                                    <h3 class="mb-0">{{ current_user.appointments_as_patient|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                                    <small class="text-muted">Pending Appointments</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Account Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-auto">
+                            <a href="{{ url_for('auth.change_password') }}" class="btn btn-primary">
+                                <i class="fas fa-key"></i> Change Password
+                            </a>
+                        </div>
+                        {% if not current_user.is_verified %}
+                        <div class="col-auto">
+                            <a href="{{ url_for('auth.resend_verification') }}" class="btn btn-warning">
+                                <i class="fas fa-envelope"></i> Resend Verification Email
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="col-auto">
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Add custom styles -->
+<style>
+.avatar-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #4a90e2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    background-color: #f8f9fa;
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.badge {
+    padding: 0.5em 1em;
+}
+</style>
 {% endblock %} 
