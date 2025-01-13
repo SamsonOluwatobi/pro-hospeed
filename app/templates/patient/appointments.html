@@ -47,9 +47,10 @@
                                             </td>
                                             <td>
                                                 <button type="button" 
-                                                        class="btn btn-sm btn-info"
+                                                        class="btn btn-sm btn-primary"
                                                         data-bs-toggle="modal"
-                                                        data-bs-target="#appointmentModal{{ appointment.id }}">
+                                                        data-bs-target="#appointmentModal{{ appointment.id }}"
+                                                        data-bs-focus="false">
                                                     <i class="fas fa-eye"></i> View
                                                 </button>
                                                 {% if appointment.status == 'pending' %}
@@ -62,38 +63,6 @@
                                             </td>
                                         </tr>
 
-                                        <!-- Appointment Details Modal -->
-                                        <div class="modal fade" id="appointmentModal{{ appointment.id }}" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Appointment Details</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <h6>Doctor Information</h6>
-                                                            <p>
-                                                                <strong>Name:</strong> Dr. {{ appointment.doctor.username }}<br>
-                                                                <strong>Specialization:</strong> {{ appointment.doctor.specialization }}<br>
-                                                                <strong>Location:</strong> {{ appointment.doctor.clinic_address }}
-                                                            </p>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <h6>Appointment Details</h6>
-                                                            <p>
-                                                                <strong>Date & Time:</strong> {{ appointment.date.strftime('%B %d, %Y %I:%M %p') }}<br>
-                                                                <strong>Status:</strong> {{ appointment.status }}<br>
-                                                                <strong>Symptoms:</strong> {{ appointment.symptoms }}<br>
-                                                                {% if appointment.notes %}
-                                                                    <strong>Notes:</strong> {{ appointment.notes }}
-                                                                {% endif %}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -111,6 +80,44 @@
         </div>
     </div>
 </div>
+<!-- Appointment Details Modal -->
+{% for appointment in appointments %}
+<div class="modal fade" id="appointmentModal{{ appointment.id }}"  data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="appointment_modal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" >
+                <h5 class="modal-title" id="appointment_modal">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Doctor Information</h6>
+                    <p>
+                        <strong>Name:</strong> Dr. {{ appointment.doctor.username }}<br>
+                        <strong>Specialization:</strong> {{ appointment.doctor.specialization }}<br>
+                        <strong>Location:</strong> {{ appointment.doctor.clinic_address }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6>Appointment Details</h6>
+                    <p>
+                        <strong>Date & Time:</strong> {{ appointment.date.strftime('%B %d, %Y %I:%M %p') }}<br>
+                        <strong>Status:</strong> {{ appointment.status }}<br>
+                        <strong>Symptoms:</strong> {{ appointment.symptoms }}<br>
+                        {% if appointment.notes %}
+                            <strong>Notes:</strong> {{ appointment.notes }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}
 
 {% block styles %}

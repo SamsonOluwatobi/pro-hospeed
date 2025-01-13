@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
-from app.models import User, Appointment
+from app.models import User, Appointment, Schedule
 from app import db
 from functools import wraps
 from sqlalchemy import func, case
@@ -135,17 +135,29 @@ def toggle_user_verification(user_id):
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
+
     if user.user_type == 'admin':
         flash('Cannot delete admin users.', 'danger')
         return redirect(url_for('admin.users'))
-    
-    # Delete all appointments where the user is either a patient or a doctor
-    Appointment.query.filter((Appointment.patient_id == user.id) | 
-                           (Appointment.doctor_id == user.id)).delete()
-    
-    db.session.delete(user)
-    db.session.commit()
-    flash(f'User {user.username} and their associated appointments deleted successfully.', 'success')
+
+    try:
+        # For doctors, ensure schedules are deleted first
+        if user.user_type == 'doctor':
+            Schedule.query.filter(Schedule.doctor_id == user.id).delete(synchronize_session='fetch')
+
+        # Remove appointments where the user is a patient or doctor
+        Appointment.query.filter((Appointment.patient_id == user.id) |
+                                 (Appointment.doctor_id == user.id)).delete(synchronize_session='fetch')
+
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
+
+        flash(f'Doctor {user.username} and their associated records were deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()  # Ensure rollback on failure
+        flash(f'An error occurred while deleting the user: {str(e)}', 'danger')
+
     return redirect(url_for('admin.users'))
 
 @admin.route('/appointment/<int:appointment_id>/update-status', methods=['POST'])
